@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vskills.dev/schema/entry.json",
+  "title": "vskills Entry",
+  "description": "A video prompt, video skill, or AI-generated video entry in the vskills directory",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "title",
+      "creator_name",
+      "creator_handle",
+      "source_url",
+      "source_type",
+      "date"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$",
+        "description": "URL-safe unique identifier (lowercase alphanumeric with hyphens)"
+      },
+      "title": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Title or description of the video/skill"
+      },
+      "creator_name": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Display name of the creator"
+      },
+      "creator_handle": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Creator's handle (X username without @, or GitHub username)"
+      },
+      "source_url": {
+        "type": "string",
+        "format": "uri",
+        "description": "URL to the original source (X post or GitHub repo)"
+      },
+      "source_type": {
+        "type": "string",
+        "enum": ["x", "github"],
+        "description": "Type of source: X post or GitHub repo"
+      },
+      "date": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "description": "Date in YYYY-MM-DD format"
+      },
+      "model": {
+        "type": ["string", "null"],
+        "description": "AI model used (e.g., 'Claude Opus 5.5', 'Seedance 2.5')"
+      },
+      "engine": {
+        "type": ["string", "null"],
+        "enum": ["hyperframes", "remotion", "seek-t-html", "video-model", "other", null],
+        "description": "Rendering engine or approach used"
+      },
+      "category": {
+        "type": ["string", "null"],
+        "enum": [
+          "ad-9x16",
+          "brand-showreel",
+          "character-story",
+          "data-viz",
+          "editing-workflow",
+          "explainer",
+          "music-visual",
+          "other",
+          "product-launch",
+          "typography",
+          "ui-motion",
+          null
+        ],
+        "description": "Content category"
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" },
+        "default": [],
+        "description": "Relevant tags/keywords"
+      },
+      "prompt": {
+        "type": ["string", "null"],
+        "description": "The prompt used to generate the video"
+      },
+      "prompt_kind": {
+        "type": ["string", "null"],
+        "enum": ["full", "brief", "example", null],
+        "description": "Type of prompt: full (≥250 chars), brief (shorter), example (from skill README)"
+      },
+      "prompt_source_url": {
+        "type": ["string", "null"],
+        "format": "uri",
+        "description": "URL where the prompt was sourced from (if different from source_url)"
+      },
+      "prompt_in_source_post": {
+        "type": ["boolean", "null"],
+        "description": "Whether the prompt was found in the source post itself"
+      },
+      "skill_url": {
+        "type": ["string", "null"],
+        "format": "uri",
+        "description": "URL to a related skill or tool"
+      },
+      "repo_url": {
+        "type": ["string", "null"],
+        "format": "uri",
+        "description": "GitHub repository URL (for skill entries)"
+      },
+      "install": {
+        "type": ["string", "null"],
+        "description": "Installation command for skills"
+      },
+      "needs_assets": {
+        "type": ["boolean", "null"],
+        "description": "Whether the prompt requires external assets (images, videos, files)"
+      },
+      "effort": {
+        "type": ["string", "null"],
+        "description": "Effort level indicator if stated by creator"
+      },
+      "video_url": {
+        "type": ["string", "null"],
+        "format": "uri",
+        "description": "Direct URL to the video file"
+      },
+      "thumbnail_url": {
+        "type": ["string", "null"],
+        "format": "uri",
+        "description": "URL to the video thumbnail image"
+      },
+      "metrics": {
+        "type": ["object", "null"],
+        "properties": {
+          "views": { "type": ["integer", "null"] },
+          "likes": { "type": ["integer", "null"] },
+          "checked": { "type": ["string", "null"] }
+        },
+        "description": "Engagement metrics from the source"
+      },
+      "license_note": {
+        "type": ["string", "null"],
+        "description": "License and attribution information"
+      }
+    },
+    "additionalProperties": false
+  }
+}
