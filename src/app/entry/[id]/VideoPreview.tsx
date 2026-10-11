@@ -1,121 +1,139 @@
 'use client';
 
 import { Entry } from '@/lib/types';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { SkillCover } from '@/components/EntryCard';
+import { ArrowUpRight, XLogo } from '@/components/icons';
 
 interface VideoPreviewProps {
   entry: Entry;
 }
 
+const frame = 'relative overflow-hidden rounded-2xl bg-black ring-1 ring-line';
+
 export function VideoPreview({ entry }: VideoPreviewProps) {
-  const [videoError, setVideoError] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [showEmbed, setShowEmbed] = useState(false);
+  const tweetId = entry.source_type === 'x' ? entry.source_url.match(/status\/(\d+)/)?.[1] : undefined;
+  if (tweetId) return <XEmbed entry={entry} tweetId={tweetId} />;
+  return <NativePreview entry={entry} />;
+}
 
-  const canShowVideo = entry.video_url && !videoError;
-  const canShowImage = entry.thumbnail_url && !imageError;
-  const isXPost = entry.source_type === 'x';
+type TwttrWidgets = {
+  widgets: {
+    createTweet: (id: string, el: HTMLElement, options: Record<string, unknown>) => Promise<HTMLElement | undefined>;
+  };
+};
 
-  if (showEmbed && isXPost) {
-    const tweetId = entry.source_url.match(/status\/(\d+)/)?.[1];
-    if (tweetId) {
-      return (
-        <div className="rounded-lg overflow-hidden border border-[var(--card-border)]">
-          <div className="aspect-video bg-neutral-900 flex items-center justify-center">
-            <iframe
-              src={`https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark`}
-              className="w-full h-full"
-              allowFullScreen
-            />
+let widgetsPromise: Promise<TwttrWidgets> | null = null;
+
+function loadWidgets(): Promise<TwttrWidgets> {
+  const w = window as Window & { twttr?: TwttrWidgets };
+  if (w.twttr?.widgets) return Promise.resolve(w.twttr);
+  widgetsPromise ??= new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://platform.twitter.com/widgets.js';
+    script.async = true;
+    script.onload = () => (w.twttr?.widgets ? resolve(w.twttr) : reject(new Error('widgets unavailable')));
+    script.onerror = () => {
+      widgetsPromise = null;
+      reject(new Error('widgets failed to load'));
+    };
+    document.head.appendChild(script);
+  });
+  return widgetsPromise;
+}
+
+// Plays the video through X's official post embed, so the media is served by X itself
+// and disappears here if the creator deletes the post.
+function XEmbed({ entry, tweetId }: { entry: Entry; tweetId: string }) {
+  const container = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
+
+  useEffect(() => {
+    const el = container.current;
+    if (!el) return;
+    let cancelled = false;
+    el.innerHTML = '';
+    loadWidgets()
+      .then((twttr) =>
+        twttr.widgets.createTweet(tweetId, el, { theme: 'dark', align: 'center', dnt: true, conversation: 'none' })
+      )
+      .then((tweet) => {
+        if (cancelled) tweet?.remove();
+        else setStatus(tweet ? 'ready' : 'unavailable');
+      })
+      .catch(() => !cancelled && setStatus('unavailable'));
+    return () => {
+      cancelled = true;
+    };
+  }, [tweetId]);
+
+  return (
+    <div className="rounded-2xl border border-line bg-surface/60 p-4 sm:p-6">
+      {status === 'loading' && (
+        <div className="mx-auto max-w-[550px] space-y-3" aria-label="Loading post">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-surface-2 animate-pulse" />
+            <div className="h-4 w-40 rounded bg-surface-2 animate-pulse" />
           </div>
-          <button
-            onClick={() => setShowEmbed(false)}
-            className="w-full py-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] bg-[var(--card-bg)]"
-          >
-            Show video player
-          </button>
+          <div className="aspect-video rounded-xl bg-surface-2 animate-pulse" />
         </div>
-      );
-    }
-  }
-
-  if (canShowVideo) {
-    return (
-      <div className="rounded-lg overflow-hidden border border-[var(--card-border)]">
-        <video
-          src={entry.video_url!}
-          controls
-          className="w-full aspect-video bg-neutral-900"
-          poster={canShowImage ? entry.thumbnail_url! : undefined}
-          preload="metadata"
-          onError={() => setVideoError(true)}
-        />
-        {isXPost && (
-          <button
-            onClick={() => setShowEmbed(true)}
-            className="w-full py-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] bg-[var(--card-bg)]"
-          >
-            Video not loading? Show embedded post
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  if (canShowImage) {
-    return (
-      <div className="rounded-lg overflow-hidden border border-[var(--card-border)]">
-        <img
-          src={entry.thumbnail_url!}
-          alt={entry.title}
-          className="w-full aspect-video object-cover bg-neutral-900"
-          onError={() => setImageError(true)}
-        />
-        {isXPost && (
-          <button
-            onClick={() => setShowEmbed(true)}
-            className="w-full py-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)] bg-[var(--card-bg)]"
-          >
-            View original post
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  if (isXPost) {
-    return (
-      <div className="rounded-lg overflow-hidden border border-[var(--card-border)]">
-        <div className="aspect-video bg-gradient-to-br from-neutral-800 to-neutral-900 flex flex-col items-center justify-center gap-4">
-          <span className="text-6xl">🎬</span>
-          <p className="text-[var(--muted)]">Media unavailable</p>
+      )}
+      {status === 'unavailable' && (
+        <div className="mx-auto flex aspect-video max-w-[550px] flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-line-strong text-center">
+          <XLogo className="w-8 h-8 text-subtle" />
+          <p className="text-muted">This post couldn&apos;t be loaded from X.</p>
           <a
             href={entry.source_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-medium hover:bg-[var(--accent-hover)] transition-colors"
+            className="label inline-flex h-10 items-center gap-2 rounded-full bg-foreground px-5 font-semibold text-background hover:bg-accent"
           >
-            View on 𝕏
+            Open on X <ArrowUpRight className="w-3.5 h-3.5" />
           </a>
         </div>
+      )}
+      <div ref={container} className={status === 'ready' ? '[&_.twitter-tweet]:!my-0' : 'h-0 overflow-hidden'} />
+    </div>
+  );
+}
+
+function NativePreview({ entry }: { entry: Entry }) {
+  const [videoError, setVideoError] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  if (entry.video_url && !videoError) {
+    return (
+      <div className={frame}>
+        <video
+          src={entry.video_url}
+          poster={entry.thumbnail_url && !imageError ? entry.thumbnail_url : undefined}
+          controls
+          playsInline
+          preload="metadata"
+          onError={() => setVideoError(true)}
+          className="block max-h-[78vh] w-full bg-black object-contain"
+        />
+      </div>
+    );
+  }
+
+  if (entry.thumbnail_url && !imageError) {
+    return (
+      <div className={frame}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={entry.thumbnail_url}
+          alt={entry.title}
+          className="block w-full object-cover"
+          onError={() => setImageError(true)}
+        />
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg overflow-hidden border border-[var(--card-border)]">
-      <div className="aspect-video bg-gradient-to-br from-neutral-800 to-neutral-900 flex flex-col items-center justify-center gap-4">
-        <span className="text-6xl">🎬</span>
-        <p className="text-[var(--muted)]">No preview available</p>
-        <a
-          href={entry.source_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-medium hover:bg-[var(--accent-hover)] transition-colors"
-        >
-          View Original
-        </a>
-      </div>
+    <div className={`${frame} aspect-video`}>
+      <SkillCover entry={entry} large />
     </div>
   );
 }

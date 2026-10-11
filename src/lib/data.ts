@@ -1,4 +1,4 @@
-import { Entry, FilterState, Category, Engine } from './types';
+import { Entry, FilterState, Category, Engine, MODEL_FAMILIES, getModelFamily } from './types';
 import entriesData from '../../data/entries.json';
 
 export const entries: Entry[] = entriesData as Entry[];
@@ -33,7 +33,10 @@ export function filterEntries(filters: Partial<FilterState>): Entry[] {
   }
 
   if (filters.model && filters.model !== 'all') {
-    result = result.filter((entry) => entry.model === filters.model);
+    const family = MODEL_FAMILIES.find((f) => f.id === filters.model);
+    result = result.filter((entry) =>
+      family ? getModelFamily(entry.model) === family.id : entry.model === filters.model
+    );
   }
 
   if (filters.engine && filters.engine !== 'all') {
@@ -99,4 +102,30 @@ export function getStats() {
     fromX: entries.filter((e) => e.source_type === 'x').length,
     fromGitHub: entries.filter((e) => e.source_type === 'github').length,
   };
+}
+
+export function getCategoryCounts(): Record<string, number> {
+  const counts: Record<string, number> = {};
+  entries.forEach((entry) => {
+    if (entry.category) counts[entry.category] = (counts[entry.category] || 0) + 1;
+  });
+  return counts;
+}
+
+export function getMostWatched(limit: number): Entry[] {
+  return [...entries]
+    .filter((e) => e.metrics?.views)
+    .sort((a, b) => (b.metrics?.views || 0) - (a.metrics?.views || 0))
+    .slice(0, limit);
+}
+
+export function getSkills(): Entry[] {
+  return entries.filter((e) => e.skill_url || e.repo_url);
+}
+
+export function getRelated(entry: Entry, limit: number): Entry[] {
+  return entries
+    .filter((e) => e.id !== entry.id && e.category === entry.category)
+    .sort((a, b) => (b.metrics?.views || 0) - (a.metrics?.views || 0))
+    .slice(0, limit);
 }

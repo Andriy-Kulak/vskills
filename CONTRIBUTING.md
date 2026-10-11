@@ -4,108 +4,16 @@ Thank you for your interest in contributing to vskills! This guide will help you
 
 ## Adding a New Entry
 
-### Requirements
+**The full rules (eligibility, where each field comes from, ID format, what never to do) are in [AGENTS.md](AGENTS.md).** It's written for coding agents, but it's the source of truth for everyone.
 
-Before adding an entry, make sure it:
+The short version:
 
-1. **Is an AI-generated video** or a **video-editing skill/tool** for AI agents
-2. **Has a public source** (X post, GitHub repo, etc.)
-3. **Has the creator's permission** to be indexed (publicly shared content is generally OK)
-4. **Includes proper attribution** to the original creator
+1. Fork the repo and add your entry to the **top** of `data/entries.json`.
+2. Get post data from the X API or X's oEmbed endpoint. Never invent values: leave unknown fields `null`.
+3. Copy prompts word for word, and only from the creator.
+4. Run `npm run validate`, then open a PR titled `Add: <id>`.
 
-### Steps to Add an Entry
-
-1. **Fork this repository**
-
-2. **Edit `data/entries.json`**
-
-   Add your entry to the array. Here's the minimal required structure:
-
-   ```json
-   {
-     "id": "creatorhandle-short-descriptive-slug",
-     "title": "Title of the Video or Skill",
-     "creator_name": "Creator Display Name",
-     "creator_handle": "creatorhandle",
-     "source_url": "https://x.com/creatorhandle/status/...",
-     "source_type": "x",
-     "date": "2026-10-01"
-   }
-   ```
-
-3. **Add optional fields as available:**
-
-   ```json
-   {
-     "model": "Claude Opus 5.5",
-     "engine": "hyperframes",
-     "category": "explainer",
-     "tags": ["tag1", "tag2"],
-     "prompt": "The full prompt text...",
-     "prompt_kind": "full",
-     "video_url": "https://video.twimg.com/...",
-     "thumbnail_url": "https://pbs.twimg.com/...",
-     "repo_url": "https://github.com/...",
-     "install": "npx cursor-tools@latest install skill-name",
-     "needs_assets": true,
-     "metrics": {
-       "views": 50000,
-       "likes": 2000,
-       "checked": "2026-10-01"
-     },
-     "license_note": "Prompt and video © the creator."
-   }
-   ```
-
-4. **Validate your changes:**
-
-   ```bash
-   npm run validate
-   ```
-
-5. **Submit a Pull Request**
-
-   Use the PR template and fill in the details about what you're adding.
-
-### Field Guidelines
-
-#### `id`
-- Lowercase, hyphenated
-- Format: `creatorhandle-short-description`
-- Must be unique
-
-#### `source_type`
-- `"x"` for X/Twitter posts
-- `"github"` for GitHub repositories
-
-#### `engine`
-- `"hyperframes"` - Hyperframes framework
-- `"remotion"` - Remotion framework
-- `"seek-t-html"` - HTML/Canvas frame-by-frame rendering
-- `"video-model"` - Pure video model generation (Seedance, Kling, etc.)
-- `"other"` - Other or unspecified
-
-#### `category`
-- `"ad-9x16"` - Vertical ads
-- `"brand-showreel"` - Brand showcase reels
-- `"character-story"` - Character-driven narratives
-- `"data-viz"` - Data visualization
-- `"editing-workflow"` - Editing workflows/tools
-- `"explainer"` - Educational/explainer content
-- `"music-visual"` - Music videos/visualizers
-- `"product-launch"` - Product launches
-- `"typography"` - Typography/kinetic text
-- `"ui-motion"` - UI/UX motion design
-- `"other"` - Other
-
-#### `prompt_kind`
-- `"full"` - Complete prompt (≥250 chars)
-- `"brief"` - Short prompt or one-liner
-- `"example"` - Example invocation from a skill README
-
-#### `needs_assets`
-- `true` if the prompt requires external assets (images, audio, reference files)
-- `false` or `null` if self-contained
+Don't want to edit JSON? [Suggest an entry](https://github.com/Andriy-Kulak/vskills/issues/new?template=new-entry.md) instead.
 
 ## Fixing Existing Data
 
@@ -148,9 +56,7 @@ npm run dev
 
 ### Code Style
 
-- TypeScript with strict mode
-- Tailwind CSS for styling
-- Follow existing patterns
+See "Changing code" in [AGENTS.md](AGENTS.md).
 
 ## Questions?
 

@@ -1,47 +1,73 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #171717;
-  --card-bg: #ffffff;
-  --card-border: #e5e5e5;
-  --muted: #737373;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
-}
+  color-scheme: dark;
+  --background: #09090b;
+  --surface: #111113;
+  --surface-2: #18181b;
+  --foreground: #f4f4f5;
+  --muted: #8b8b93;
+  --subtle: #5a5a63;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --accent: #d4ff3f;
+  --accent-ink: #0b0d02;
+  --skill: #b69cff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --card-bg: #171717;
-    --card-border: #262626;
-    --muted: #a3a3a3;
-    --accent: #60a5fa;
-    --accent-hover: #93c5fd;
-  }
+  /* legacy aliases used by secondary pages */
+  --card-bg: var(--surface);
+  --card-border: var(--line);
+  --accent-hover: #e4ff7a;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
-  --color-card-bg: var(--card-bg);
-  --color-card-border: var(--card-border);
   --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
+  --color-accent-ink: var(--accent-ink);
+  --color-skill: var(--skill);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+  --font-serif: var(--font-serif);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 9rem;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-stretch: 125%;
+}
+
+.label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .hide-scrollbar {
@@ -53,34 +79,97 @@ body {
   display: none;
 }
 
-.video-thumbnail {
-  transition: transform 0.2s ease-out;
+.fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
 }
 
-.video-thumbnail:hover {
-  transform: scale(1.02);
+.grid-bg {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
-.copy-button {
-  transition: all 0.15s ease;
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(var(--r, 0deg));
+  }
 }
 
-.copy-button:active {
-  transform: scale(0.95);
+.float {
+  animation: float 9s ease-in-out infinite;
 }
 
-.entry-card {
-  transition: all 0.2s ease;
+@keyframes kenburns {
+  0%,
+  100% {
+    transform: scale(1.08) translate3d(-3%, -2%, 0);
+  }
+  50% {
+    transform: scale(1.22) translate3d(3%, 2%, 0);
+  }
 }
 
-.entry-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+.kenburns {
+  animation: kenburns 18s ease-in-out infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  .entry-card:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise {
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  animation: spin-slow 120s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float,
+  .kenburns,
+  .marquee,
+  .rise,
+  .spin-slow {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
   }
 }
 
