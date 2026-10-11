@@ -128,7 +128,7 @@ See [`data/schema.json`](data/schema.json) for the full JSON Schema.
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for how to:
+We welcome contributions, from people and coding agents alike. **[AGENTS.md](AGENTS.md)** is the source of truth for adding entries: where each field comes from, the ID format, and the rules (never invent data, copy prompts word for word). See [CONTRIBUTING.md](CONTRIBUTING.md) for how to:
 - Add a new entry
 - Fix or improve existing data
 - Report issues

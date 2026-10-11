@@ -30,6 +30,13 @@ try {
 const errors = [];
 const warnings = [];
 const ids = new Set();
+const sourceUrls = new Set();
+
+// Rules below are documented in AGENTS.md; keep the two in sync.
+const X_STATUS_URL = /^https:\/\/x\.com\/([A-Za-z0-9_]+)\/status\/(\d+)$/;
+const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const knownModel = (m) => /^Any coding agent|Opus|Seedance/.test(m);
+const today = new Date().toISOString().slice(0, 10);
 
 const requiredFields = ['id', 'title', 'creator_name', 'creator_handle', 'source_url', 'source_type'];
 const requiredFieldsForX = ['date'];
@@ -107,6 +114,58 @@ entries.forEach((entry, index) => {
       }
     }
   });
+
+  // Same post or repo listed twice under different ids
+  if (entry.source_url) {
+    if (sourceUrls.has(entry.source_url)) {
+      errors.push(`${prefix}: Duplicate source_url ${entry.source_url}`);
+    }
+    sourceUrls.add(entry.source_url);
+  }
+
+  // id = slug(creator_handle) + '-' + slug(title words)
+  if (entry.id && entry.creator_handle && !entry.id.startsWith(`${slugify(entry.creator_handle)}-`)) {
+    errors.push(`${prefix}: ID must start with '${slugify(entry.creator_handle)}-' (slug of creator_handle)`);
+  }
+
+  if (entry.source_type === 'x' && entry.source_url) {
+    const match = entry.source_url.match(X_STATUS_URL);
+    if (!match) {
+      errors.push(`${prefix}: X source_url must look like https://x.com/<handle>/status/<id> (no query string)`);
+    } else if (entry.creator_handle && match[1].toLowerCase() !== entry.creator_handle.toLowerCase()) {
+      errors.push(`${prefix}: creator_handle '${entry.creator_handle}' does not match the handle in source_url`);
+    }
+    if (entry.thumbnail_url && !entry.thumbnail_url.startsWith('https://pbs.twimg.com/')) {
+      warnings.push(`${prefix}: thumbnail_url for X posts should come from pbs.twimg.com`);
+    }
+  }
+
+  if (entry.date && entry.date > today) {
+    errors.push(`${prefix}: date ${entry.date} is in the future`);
+  }
+
+  if (entry.prompt_kind && !entry.prompt) {
+    errors.push(`${prefix}: prompt_kind is set but prompt is empty`);
+  }
+  if (entry.prompt_kind === 'full' && entry.prompt && entry.prompt.length < 250) {
+    errors.push(`${prefix}: prompt_kind 'full' needs at least 250 characters; use 'brief'`);
+  }
+
+  if (entry.model && !knownModel(entry.model)) {
+    warnings.push(`${prefix}: model '${entry.model}' won't match a model family filter (see AGENTS.md)`);
+  }
+
+  if (entry.metrics) {
+    ['views', 'likes'].forEach((k) => {
+      const v = entry.metrics[k];
+      if (v !== undefined && v !== null && (!Number.isInteger(v) || v < 0)) {
+        errors.push(`${prefix}: metrics.${k} must be a non-negative integer`);
+      }
+    });
+    if (entry.metrics.checked && !/^\d{4}-\d{2}-\d{2}$/.test(entry.metrics.checked)) {
+      errors.push(`${prefix}: metrics.checked must be YYYY-MM-DD`);
+    }
+  }
 
   // Warnings for missing optional but recommended fields
   if (!entry.prompt && !entry.repo_url && !entry.skill_url) {

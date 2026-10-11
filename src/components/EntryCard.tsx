@@ -109,9 +109,17 @@ export function SkillCover({ entry, large = false }: { entry: Entry; large?: boo
       }}
     >
       <div className="grid-bg absolute inset-0 opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-      <GitHubLogo className={`absolute right-4 top-4 text-white/25 ${large ? 'w-10 h-10' : 'w-6 h-6'}`} />
+      {entry.source_type === 'x' ? (
+        <XLogo className={`absolute right-4 top-4 text-white/25 ${large ? 'w-9 h-9' : 'w-5 h-5'}`} />
+      ) : (
+        <GitHubLogo className={`absolute right-4 top-4 text-white/25 ${large ? 'w-10 h-10' : 'w-6 h-6'}`} />
+      )}
       <div className="relative">
-        {repo && <p className="font-mono text-[11px] text-white/55 truncate">{repo.owner} /</p>}
+        {repo ? (
+          <p className="font-mono text-[11px] text-white/55 truncate">{repo.owner} /</p>
+        ) : (
+          <p className="font-mono text-[11px] text-white/55 truncate">@{entry.creator_handle}</p>
+        )}
         <p
           className={`font-display font-extrabold leading-[1.05] text-white line-clamp-2 ${
             large ? 'text-4xl' : 'text-xl'

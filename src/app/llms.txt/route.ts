@@ -20,6 +20,7 @@ export async function GET() {
     '- Individual entry markdown: https://vskills.dev/entries/{id}.md',
     '- Website: https://vskills.dev',
     '- GitHub: https://github.com/Andriy-Kulak/vskills',
+    '- Contributing (agents and humans): https://github.com/Andriy-Kulak/vskills/blob/main/AGENTS.md',
     '',
     '## Entry Index',
     '',
