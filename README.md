@@ -18,19 +18,20 @@ vskills is like [cursor.directory](https://cursor.directory) or [skillry.dev](ht
 ## Features
 
 ### For Humans
-- Grid of entries with video thumbnails (lazy preview on hover)
-- Fast client-side search and filters (category, model, engine, has prompt, has skill, needs assets)
+- Media-first grid plus curated rails (most watched, installable skills)
+- Entry pages play videos through X's official post embed
+- Fast client-side search (⌘K or `/`), category chips, prompt/skill toggle, model family, engine, and sort by newest or most watched
 - Shareable filter URLs
 - Entry detail pages with one-click prompt copying
-- Dark mode support
+- Dark, cinematic UI
 - Mobile friendly
 
 ### For AI/LLMs
 - **[/llms.txt](https://vskills.dev/llms.txt)** - Summary index of all entries
 - **[/llms-full.txt](https://vskills.dev/llms-full.txt)** - Full catalog with all prompts
 - **[/api/entries](https://vskills.dev/api/entries)** - JSON API with search/filter support
-- **[/api/entries/{id}](https://vskills.dev/api/entries/example-id)** - Individual entry JSON
-- **[/entries/{id}.md](https://vskills.dev/entries/example-id.md)** - Raw markdown per entry
+- **[/api/entries/{id}](https://vskills.dev/api/entries/twoclipping-one-shape-a-seamless-ui-morph)** - Individual entry JSON
+- **[/entries/{id}.md](https://vskills.dev/entries/twoclipping-one-shape-a-seamless-ui-morph.md)** - Raw markdown per entry
 - JSON-LD structured data on all entry pages
 
 ## API Usage
@@ -48,8 +49,8 @@ curl "https://vskills.dev/api/entries?q=music"
 # Filter by category
 curl "https://vskills.dev/api/entries?category=explainer"
 
-# Filter by model
-curl "https://vskills.dev/api/entries?model=Claude%20Opus%205.5"
+# Filter by model family (opus, seedance, any-agent) or an exact model string
+curl "https://vskills.dev/api/entries?model=seedance"
 
 # Multiple filters
 curl "https://vskills.dev/api/entries?hasPrompt=true&hasSkill=true"
@@ -60,7 +61,7 @@ curl "https://vskills.dev/api/entries?limit=10&offset=20"
 
 ### Get single entry
 ```bash
-curl https://vskills.dev/api/entries/donaldjewkes-claude-pop
+curl https://vskills.dev/api/entries/twoclipping-one-shape-a-seamless-ui-morph
 ```
 
 ### Response format
@@ -111,13 +112,17 @@ All entries are stored in [`data/entries.json`](data/entries.json). Each entry h
 | `tags` | string[]? | Relevant tags |
 | `prompt` | string? | The prompt used |
 | `prompt_kind` | `"full"` \| `"brief"` \| `"example"`? | Prompt completeness |
+| `prompt_source_url` | string? | Where the prompt text was taken from |
+| `prompt_in_source_post` | boolean? | Whether the prompt appears in the original post |
 | `skill_url` | string? | Related skill/tool URL |
 | `repo_url` | string? | GitHub repository |
 | `install` | string? | Install command for skills |
 | `needs_assets` | boolean? | Whether external assets are needed |
-| `video_url` | string? | Direct video URL |
+| `effort` | string? | Reported effort / reasoning level |
+| `video_url` | string? | Media URL from the source API (the site plays X videos via the official embed, not this URL) |
 | `thumbnail_url` | string? | Thumbnail image URL |
 | `metrics` | object? | View/like counts |
+| `license_note` | string? | Per-entry attribution and license notes |
 
 See [`data/schema.json`](data/schema.json) for the full JSON Schema.
 
@@ -150,9 +155,9 @@ npm run validate
 
 ## Tech Stack
 
-- [Next.js](https://nextjs.org/) (App Router)
+- [Next.js 16](https://nextjs.org/) (App Router, Cache Components)
 - [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
+- [Tailwind CSS v4](https://tailwindcss.com/)
 - Static generation (no database)
 - Deployable to [Vercel](https://vercel.com/)
 
@@ -162,6 +167,10 @@ npm run validate
 - **Content**: All prompts and videos belong to their original creators. This directory only indexes publicly shared content with attribution.
 
 See [Sources & Attribution](https://vskills.dev/sources) for upstream data sources and their licenses.
+
+### Creators: removal and corrections
+
+X videos are shown through X's official post embed, so they're served by X and disappear here if you delete the post. If you'd like an entry removed or corrected, use the **Request removal** link on its page or [open a takedown issue](https://github.com/Andriy-Kulak/vskills/issues/new?template=takedown.md).
 
 ## Credits
 

@@ -89,3 +89,27 @@ export const ENGINE_LABELS: Record<Engine, string> = {
   'video-model': 'Video Model',
   'other': 'Other',
 };
+
+export type SortOrder = 'newest' | 'popular';
+
+export const MODEL_FAMILIES = [
+  { id: 'opus', label: 'Claude Opus 5.5' },
+  { id: 'seedance', label: 'Seedance' },
+  { id: 'any-agent', label: 'Any coding agent' },
+] as const;
+
+export function getModelFamily(model?: string | null): string | null {
+  if (!model) return null;
+  if (model.startsWith('Any coding agent')) return 'any-agent';
+  if (model.includes('Opus')) return 'opus';
+  if (model.includes('Seedance')) return 'seedance';
+  return null;
+}
+
+export function shortModel(model?: string | null): string | null {
+  if (!model) return null;
+  if (model.startsWith('Any coding agent')) return 'Any agent';
+  if (model.startsWith('Claude Opus 5.5')) return 'Opus 5.5';
+  if (model.startsWith('Seedance (')) return 'Seedance';
+  return model;
+}

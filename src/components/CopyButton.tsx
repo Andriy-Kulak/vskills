@@ -1,14 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import { CheckIcon, CopyIcon } from './icons';
 
 interface CopyButtonProps {
   text: string;
   label?: string;
+  variant?: 'ghost' | 'primary';
   className?: string;
 }
 
-export function CopyButton({ text, label = 'Copy', className = '' }: CopyButtonProps) {
+export function CopyButton({ text, label = 'Copy', variant = 'ghost', className = '' }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -21,31 +23,24 @@ export function CopyButton({ text, label = 'Copy', className = '' }: CopyButtonP
     }
   };
 
+  const styles =
+    variant === 'primary'
+      ? `h-12 w-full justify-center rounded-full text-[15px] font-semibold ${
+          copied ? 'bg-foreground text-background' : 'bg-accent text-accent-ink hover:brightness-110'
+        }`
+      : `h-8 rounded-full border px-3 text-[13px] font-medium ${
+          copied
+            ? 'border-accent text-accent'
+            : 'border-line text-muted hover:border-line-strong hover:text-foreground'
+        }`;
+
   return (
     <button
       onClick={handleCopy}
-      className={`copy-button inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-sm font-medium hover:bg-[var(--accent)] hover:text-white hover:border-[var(--accent)] transition-colors ${className}`}
+      className={`inline-flex items-center gap-2 transition active:scale-[0.97] ${styles} ${className}`}
     >
-      {copied ? (
-        <>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          Copied!
-        </>
-      ) : (
-        <>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-            />
-          </svg>
-          {label}
-        </>
-      )}
+      {copied ? <CheckIcon /> : <CopyIcon />}
+      {copied ? 'Copied!' : label}
     </button>
   );
 }

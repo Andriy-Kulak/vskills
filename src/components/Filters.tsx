@@ -1,178 +1,218 @@
 'use client';
 
-import { FilterState, Category, Engine, CATEGORY_LABELS, ENGINE_LABELS } from '@/lib/types';
+import { forwardRef } from 'react';
+import {
+  FilterState,
+  Category,
+  Engine,
+  SortOrder,
+  CATEGORY_LABELS,
+  ENGINE_LABELS,
+  MODEL_FAMILIES,
+} from '@/lib/types';
+import { ChevronDown, CloseIcon, SearchIcon } from './icons';
+
+export type Kind = 'all' | 'prompt' | 'skill';
 
 interface FiltersProps {
   filters: FilterState;
+  sort: SortOrder;
   onFilterChange: (filters: Partial<FilterState>) => void;
-  models: string[];
+  onSortChange: (sort: SortOrder) => void;
   categories: Category[];
+  categoryCounts: Record<string, number>;
   engines: Engine[];
-  resultCount: number;
   totalCount: number;
 }
 
-export function Filters({
-  filters,
-  onFilterChange,
-  models,
-  categories,
-  engines,
-  resultCount,
-  totalCount,
-}: FiltersProps) {
+export function kindOf(filters: FilterState): Kind {
+  if (filters.hasSkill) return 'skill';
+  if (filters.hasPrompt) return 'prompt';
+  return 'all';
+}
+
+const KIND_OPTIONS: { id: Kind; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'prompt', label: 'Prompts' },
+  { id: 'skill', label: 'Skills' },
+];
+
+export const Filters = forwardRef<HTMLInputElement, FiltersProps>(function Filters(
+  { filters, sort, onFilterChange, onSortChange, categories, categoryCounts, engines, totalCount },
+  searchRef
+) {
+  const kind = kindOf(filters);
+
   return (
-    <div className="space-y-4">
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Search prompts, creators, tags..."
-          value={filters.search}
-          onChange={(e) => onFilterChange({ search: e.target.value })}
-          className="w-full px-4 py-2.5 pl-10 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent"
-        />
-        <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted)]"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="relative w-full sm:w-auto sm:flex-1 sm:min-w-[220px]">
+          <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+          <input
+            ref={searchRef}
+            type="search"
+            placeholder="Search prompts, creators, tags…"
+            value={filters.search}
+            onChange={(e) => onFilterChange({ search: e.target.value })}
+            className="h-11 w-full rounded-full border border-line bg-surface pl-11 pr-12 text-[15px] text-foreground placeholder:text-subtle transition-colors focus:border-accent focus:outline-none [&::-webkit-search-cancel-button]:hidden"
           />
-        </svg>
-      </div>
+          {filters.search ? (
+            <button
+              onClick={() => onFilterChange({ search: '' })}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-muted hover:bg-surface-2 hover:text-foreground"
+            >
+              <CloseIcon className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <kbd className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 rounded border border-line px-1.5 py-0.5 font-mono text-[10px] text-subtle">
+              /
+            </kbd>
+          )}
+        </label>
 
-      <div className="flex flex-wrap gap-2">
-        <select
-          value={filters.category}
-          onChange={(e) =>
-            onFilterChange({ category: e.target.value as Category | 'all' })
-          }
-          className="px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-        >
-          <option value="all">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {CATEGORY_LABELS[cat]}
-            </option>
-          ))}
-        </select>
+        <div className="hide-scrollbar -mx-4 flex w-[calc(100%+2rem)] gap-2 overflow-x-auto px-4 sm:mx-0 sm:w-auto sm:overflow-visible sm:px-0 [&>*]:shrink-0">
+          <div className="flex h-11 rounded-full border border-line bg-surface p-1" role="radiogroup" aria-label="Entry type">
+            {KIND_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                role="radio"
+                aria-checked={kind === opt.id}
+                onClick={() =>
+                  onFilterChange({
+                    hasPrompt: opt.id === 'prompt' ? true : null,
+                    hasSkill: opt.id === 'skill' ? true : null,
+                  })
+                }
+                className={`rounded-full px-4 text-sm font-medium transition-colors ${
+                  kind === opt.id ? 'bg-foreground text-background' : 'text-muted hover:text-foreground'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
 
-        <select
-          value={filters.model}
-          onChange={(e) => onFilterChange({ model: e.target.value })}
-          className="px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-        >
-          <option value="all">All Models</option>
-          {models.map((model) => (
-            <option key={model} value={model}>
-              {model}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={filters.engine}
-          onChange={(e) =>
-            onFilterChange({ engine: e.target.value as Engine | 'all' })
-          }
-          className="px-3 py-1.5 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-        >
-          <option value="all">All Engines</option>
-          {engines.map((engine) => (
-            <option key={engine} value={engine}>
-              {ENGINE_LABELS[engine]}
-            </option>
-          ))}
-        </select>
-
-        <div className="flex items-center gap-2">
-          <ToggleButton
-            label="Has Prompt"
-            value={filters.hasPrompt}
-            onChange={(v) => onFilterChange({ hasPrompt: v })}
+          <PillSelect
+            label="Model"
+            value={filters.model}
+            onChange={(model) => onFilterChange({ model })}
+            options={MODEL_FAMILIES.map((f) => ({ value: f.id, label: f.label }))}
           />
-          <ToggleButton
-            label="Has Skill"
-            value={filters.hasSkill}
-            onChange={(v) => onFilterChange({ hasSkill: v })}
+          <PillSelect
+            label="Engine"
+            value={filters.engine}
+            onChange={(engine) => onFilterChange({ engine: engine as Engine | 'all' })}
+            options={engines.filter((e) => e !== 'other').map((e) => ({ value: e, label: ENGINE_LABELS[e] }))}
           />
-          <ToggleButton
-            label="Needs Assets"
-            value={filters.needsAssets}
-            onChange={(v) => onFilterChange({ needsAssets: v })}
+          <PillSelect
+            label="Sort"
+            value={sort}
+            allLabel={null}
+            onChange={(v) => onSortChange(v as SortOrder)}
+            options={[
+              { value: 'newest', label: 'Newest' },
+              { value: 'popular', label: 'Most watched' },
+            ]}
           />
+
         </div>
       </div>
 
-      <div className="text-sm text-[var(--muted)]">
-        Showing {resultCount} of {totalCount} entries
-        {filters.search ||
-        filters.category !== 'all' ||
-        filters.model !== 'all' ||
-        filters.engine !== 'all' ||
-        filters.hasPrompt !== null ||
-        filters.hasSkill !== null ||
-        filters.needsAssets !== null ? (
-          <button
-            onClick={() =>
-              onFilterChange({
-                search: '',
-                category: 'all',
-                model: 'all',
-                engine: 'all',
-                hasPrompt: null,
-                hasSkill: null,
-                needsAssets: null,
-              })
-            }
-            className="ml-2 text-[var(--accent)] hover:underline"
-          >
-            Clear filters
-          </button>
-        ) : null}
+      <div className="hide-scrollbar fade-x -mx-4 flex gap-2 overflow-x-auto px-4 sm:-mx-6 sm:px-6">
+        <CategoryChip
+          label="Everything"
+          count={totalCount}
+          active={filters.category === 'all'}
+          onClick={() => onFilterChange({ category: 'all' })}
+        />
+        {categories.map((c) => (
+          <CategoryChip
+            key={c}
+            label={CATEGORY_LABELS[c]}
+            count={categoryCounts[c] || 0}
+            active={filters.category === c}
+            onClick={() => onFilterChange({ category: filters.category === c ? 'all' : c })}
+          />
+        ))}
+        <span className="mx-1 w-px shrink-0 bg-line" />
+        <CategoryChip
+          label="No assets needed"
+          active={filters.needsAssets === false}
+          onClick={() => onFilterChange({ needsAssets: filters.needsAssets === false ? null : false })}
+        />
       </div>
     </div>
   );
+});
+
+function CategoryChip({
+  label,
+  count,
+  active,
+  onClick,
+}: {
+  label: string;
+  count?: number;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13px] transition-colors ${
+        active
+          ? 'border-accent bg-accent text-accent-ink font-medium'
+          : 'border-line text-muted hover:border-line-strong hover:text-foreground'
+      }`}
+    >
+      {label}
+      {count !== undefined && (
+        <span className={`font-mono text-[11px] ${active ? 'text-accent-ink/60' : 'text-subtle'}`}>{count}</span>
+      )}
+    </button>
+  );
 }
 
-function ToggleButton({
+function PillSelect({
   label,
   value,
   onChange,
+  options,
+  allLabel = 'Any',
 }: {
   label: string;
-  value: boolean | null;
-  onChange: (value: boolean | null) => void;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+  allLabel?: string | null;
 }) {
-  const handleClick = () => {
-    if (value === null) {
-      onChange(true);
-    } else if (value === true) {
-      onChange(false);
-    } else {
-      onChange(null);
-    }
-  };
-
+  const active = allLabel !== null && value !== 'all';
   return (
-    <button
-      onClick={handleClick}
-      className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-        value === true
-          ? 'bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30'
-          : value === false
-          ? 'bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30'
-          : 'bg-[var(--card-bg)] text-[var(--muted)] border border-[var(--card-border)]'
+    <label
+      className={`relative inline-flex h-11 items-center rounded-full border pl-4 pr-9 text-sm transition-colors ${
+        active ? 'border-accent text-foreground' : 'border-line bg-surface text-muted hover:text-foreground'
       }`}
     >
-      {value === true && '✓ '}
-      {value === false && '✗ '}
-      {label}
-    </button>
+      <span className="mr-1.5 text-subtle">{label}</span>
+      <span className="font-medium text-foreground">
+        {value === 'all' ? allLabel : options.find((o) => o.value === value)?.label}
+      </span>
+      <ChevronDown className="pointer-events-none absolute right-3.5 h-3.5 w-3.5" />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={label}
+        className="absolute inset-0 cursor-pointer opacity-0"
+      >
+        {allLabel !== null && <option value="all">{allLabel}</option>}
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
