@@ -3,7 +3,7 @@
 > A **free**, open-source directory of AI-made videos, video prompts, and video/video-editing agent skills.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Entries](https://img.shields.io/badge/Entries-115-green.svg)](https://vskills.dev)
+[![Entries](https://img.shields.io/badge/Entries-131-green.svg)](https://vskills.dev)
 
 **[Browse the directory →](https://vskills.dev)**
 
