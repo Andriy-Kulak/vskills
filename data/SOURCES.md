@@ -38,6 +38,22 @@ Built on 2026-10-10 (America/Mexico_City). `videos.json` has 115 entries. Every 
 | https://github.com/OSideMedia/higgsfield-ai-prompt-skill | MIT |
 | https://github.com/zenstory-ai/drama-skills | MIT |
 | https://github.com/WinterArc21/Battle-of-Austerlitz-Film (repo_url on the Austerlitz entry) | none (all rights reserved by default) |
+| https://github.com/browser-use/video-use (added 2026-10-11) | MIT |
+| https://github.com/calesthio/OpenMontage (added 2026-10-11) | AGPL-3.0 |
+| https://github.com/Vincentwei1021/video-shotcraft (added 2026-10-11) | Apache-2.0 |
+| https://github.com/digitalsamba/claude-code-video-toolkit (added 2026-10-11) | MIT |
+| https://github.com/kajisho5/ffmpeg-skill (added 2026-10-11) | MIT |
+| https://github.com/luoluoluo22/jianying-editor-skill (added 2026-10-11) | NOASSERTION (LICENSE file is MIT) |
+| https://github.com/charlie947/motion-graphics-skills (added 2026-10-11) | MIT |
+| https://github.com/Barty-Bart/motion-graphics (added 2026-10-11) | NOASSERTION (LICENSE file is MIT) |
+| https://github.com/op7418/guizang-product-video-skill (added 2026-10-11) | AGPL-3.0 |
+| https://github.com/haidrrrry/claude-remotion-skill (added 2026-10-11) | MIT |
+| https://github.com/audrey-560/hyperframes-cinematic-caption (added 2026-10-11) | MIT |
+| https://github.com/pexoai/pexo-skills (added 2026-10-11) | MIT |
+| https://github.com/LeoYeAI/seedance-skills (added 2026-10-11) | MIT |
+| https://github.com/alchaincyf/seedance-skill (added 2026-10-11) | MIT |
+| https://github.com/lattifai/omni-captions-skills (added 2026-10-11) | MIT |
+| https://github.com/runesleo/claude-video-kit (added 2026-10-11) | MIT |
 
 ## Field notes
 - `prompt_kind`: `full` (≥250 chars), `brief` (a shorter prompt or one-liner), `example` (an example invocation from a skill README), or null.
